@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Scans for ##RADDR##</title>
+    <link rel="stylesheet" href="../styles.css">
+  </head>
+  <body>
+    <main>
+        <h1>Scans for ##RADDR##</h1>
+        <p>
+            See below for all of the nmap scans targetting this host
+        </p>
+        <ul>
+            <li>
+                <a href="port-scan-tcp.html"> TCP Port Scan </a>
+                <p class="note-text">
+                    Scan of all TCP ports
+                </p>
+            </li>
+            <li>
+                <a href="script-scan-tcp.html"> Default Scripts Scan </a>
+                <p class="note-text">
+                    Script scan, using all scripts marked "default" <br/>
+                    For a comprehensive list of scripts, go to the <a href="https://nmap.org/nsedoc/scripts/"> NSE documentation </a>
+                </p>
+            </li>
+            <li>
+                <a href="vuln-scan-tcp.html"> "Vuln" Scripts Scan </a>
+                <p class="note-text">
+                    Script scan, using all scripts marked "safe" and "vuln" <br/>
+                    <quote>To check what other scripts could be used, try this:
+                        <code class="codebox">
+                            KEYWORD="vuln"; grep -r -E -l  "categories = {.*\"$KEYWORD\".*}" /usr/share/nmap/scripts | xargs -n1 basename
+                        </code>
+                    </quote>
+                </p>
+            </li>
+            <li>
+                <a href="port-scan-udp.html"> UDP Port Scan </a>
+                <p class="note-text">
+                    Scan of the top 100 UDP ports
+                </p>
+            </li>
+        </ul>
+    </main>
+  </body>
+</html>
+

@@ -1,37 +1,29 @@
 #!/bin/bash
 
-
-USAGE="Usage: $0 <iface> [directory]\nWhere <iface> is the desired network interface, ex. \"wlan0\"\n  and [directory] is the path to a directory to store the results"
+USAGE="Usage: $0 {target specification}\n    The argument can be an IP address, IP range, CIDR address, etc.\n    Use anything that nmap would accept as a target specification."
 
 if [ $# -gt 0 ]; then
-    # Network interface is required
-    IFACE=$1
-    if [ $# -gt 1 ]; then
-        # Trim off a trailing slash if one was provided
-        WORKDIR="${2%/}"
-    else
-        # Use the timestamp
-        WORKDIR=nmap-$(date +"%s")
-    fi
+    TARGET=$1
 else
     echo -e "$USAGE"
     exit 1
 fi
 
-mkdir -p "$WORKDIR"
-
-# Read the IP and CIDR address of the network interface
-CIDR=$(ip addr show $IFACE | grep 'inet ' | grep -oE '([0-9]{1,3}.){4}/[0-9]{1,2}')
-IP="${CIDR%%/*}"; NETWORK="${CIDR#*/}"; 
-
-echo -e "Scanning network: $IP/$NETWORK\n"
+SCRIPT_DIR=$(dirname "$(realpath -s "$0")")
+mkdir -p "$SCRIPT_DIR/host-discovery"
+echo -e "Performing host discovery on: $TARGET ..."
 
 # Perform the scan
-sudo nmap -sn -oN $WORKDIR/host-discovery.txt "$CIDR" | \
+sudo nmap -sn -T4 --reason -oN "$SCRIPT_DIR/host-discovery/discovery.txt" -oX "$SCRIPT_DIR/host-discovery/discovery.xml" "$TARGET" | \
 	grep 'scan report for' | \
-	grep -oE '\(.*\)' | \
+	grep -oE '([0-9]{1,3}.){3}[0-9]{1,3}' | \
 	sed 's/[()]//g' | \
-	sort -t. -n -k1,1 -k2,2 -k3,3 -k4,4 > $WORKDIR/host-discovery-ip-list.txt
+	sort -t. -n -k1,1 -k2,2 -k3,3 -k4,4 > "$SCRIPT_DIR/host-discovery/ip-list.txt"
+	
+# Parse the XML into HTML
+xsltproc "$SCRIPT_DIR/host-discovery/discovery.xml" -o "$SCRIPT_DIR/host-discovery/discovery.html"
+rm -f "$SCRIPT_DIR/host-discovery/discovery.xml"
 
 # Display the result
-cat test/host-discovery.txt | grep 'scan report for' | awk -F 'scan report for' '{print $2}'
+echo -e "\n\nDISCOVERED HOSTS:\n"
+cat "$SCRIPT_DIR/host-discovery/discovery.txt" | grep 'scan report for' | awk -F 'scan report for' '{print $2}'
